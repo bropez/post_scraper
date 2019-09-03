@@ -1,0 +1,5 @@
+__pycache__/
+tester_dir/*
+
+*.log
+*.zip
