@@ -148,13 +148,19 @@ def picture_and_tts(total_submissions: int, total_comments: int, hottest: list) 
         all_comments = get_comments(directory_name,reddit_obj, submission_id, total_comments)
         for comment in all_comments:
             if iteration == 0:
-                post_title, post_link= comment.split("|||")
+                post_title, post_link = comment.split("|||")
+                title, author = post_title.split(" submitted by ")
 
                 tts(post_title, directory_name, ".title")
                 screenshot_title(post_link, directory_name, ".title", None)
 
                 file = open("{}/.description.txt".format(directory_name), "w")
                 file.write(post_title + "\n" + post_link)
+                file.close()
+
+                # youtube description
+                file = open("{}/.ytdescription.txt".format(directory_name), "w")
+                file.write("{}\n\nPosted by u/{}".format(title, author))
                 file.close()
             else:
                 comment_number, comment_text, comment_link, comment_id = comment.split("|||")

@@ -18,6 +18,7 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
 import os
+import time
 
 
 def headless() -> webdriver.Firefox:
@@ -33,6 +34,7 @@ def headless() -> webdriver.Firefox:
     options.set_preference("dom.push.enabled", False)
     options.headless = True
     b = webdriver.Firefox(options=options)
+    b.set_window_size(1920, 1080)
 
     return b
 
@@ -100,7 +102,11 @@ def screenshot_comment(link: str, directoryname: str, filename: str, id: str):
         pass
 
     if id:
-        element = browser.find_element_by_id(id)
+        try:
+            element = browser.find_element_by_id(id)
+        except NoSuchElementException:
+            time.sleep(10)
+            element = browser.find_element_by_id(id)
         browser.execute_script("arguments[0].scrollIntoView(alignToTop=false);", element)
 
 
