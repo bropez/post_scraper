@@ -19,6 +19,8 @@ from selenium.common.exceptions import NoSuchElementException
 
 import os
 import time
+from text_to_speech import tts
+from tqdm import tqdm
 
 
 def headless() -> webdriver.Firefox:
@@ -32,7 +34,7 @@ def headless() -> webdriver.Firefox:
     """
     options = webdriver.FirefoxOptions()
     options.set_preference("dom.push.enabled", False)
-    options.headless = True
+    # options.headless = True
     b = webdriver.Firefox(options=options)
     b.set_window_size(1920, 1080)
 
@@ -54,7 +56,7 @@ def nsfw_check(b: webdriver.Firefox):
         pass
 
 
-def screenshot_title(link: str, directoryname: str, filename: str, id: str):
+def screenshot_title(browser: webdriver.Firefox, link: str, directoryname: str, filename: str, id: str):
     """The browser takes a screenshot of the title
 
     Args:
@@ -66,7 +68,7 @@ def screenshot_title(link: str, directoryname: str, filename: str, id: str):
     Returns:
         None
     """
-    browser = headless()
+    # browser = headless()
     browser.get(link)
     nsfw_check(browser)
 
@@ -74,12 +76,12 @@ def screenshot_title(link: str, directoryname: str, filename: str, id: str):
         element = browser.find_element_by_id(id)
         browser.execute_script("arguments[0].scrollIntoView(alignToTop=false);", element)
 
-
     browser.save_screenshot("{}/pictures/{}.png".format(directoryname, filename))
-    browser.quit()
+    # browser.quit()
 
 
-def screenshot_comment(link: str, directoryname: str, filename: str, id: str):
+# def screenshot_comment(link: str, directoryname: str, filename: str, id: str):
+def screenshot_comment(comments: list, directory_name: str):
     """The browser takes a screenshot of the comment
 
     Args:
@@ -92,35 +94,61 @@ def screenshot_comment(link: str, directoryname: str, filename: str, id: str):
         None
     """
     browser = headless()
-    browser.get(link)
-    nsfw_check(browser)
 
+    title = comments.pop(0)
+    post, post_link = title.split("|||")
+    post_title, post_author = post.split(" submitted by ")
+    tts(post_title, directory_name, ".title")
+    screenshot_title(browser, post_link, directory_name, ".title", None)
 
-    try:
-        browser.find_element_by_css_selector('.PiO8QDmoJoOL2sDjJAk4C.j9NixHqtN2j8SKHcdJ0om').click()
-    except NoSuchElementException:
-        pass
+    file = open("{}/.description.txt".format(directory_name), "w")
+    file.write(post_title + "\n" + post_link)
+    file.close()
 
-    if id:
+    # youtube description
+    file = open("{}/.ytdescription.txt".format(directory_name), "w")
+    file.write("{}\n\nPosted by u/{}".format(post_title, post_author))
+    file.close()
+    
+    for comment in tqdm(comments):
+        comment_number, comment_text, comment_link, comment_id = comment.split("|||")
+        # number, link = comment.split("|||")
+        # id = link.split("/")[-2]
+        id = "t1_{}".format(comment_id)
+        file_name = "comment{}".format(comment_number)
+
+        browser.get(comment_link)
+        nsfw_check(browser)
+
+        f = open("{}/.comments.txt".format(directory_name), "a")
+
         try:
-            element = browser.find_element_by_id(id)
+            browser.find_element_by_css_selector('.PiO8QDmoJoOL2sDjJAk4C.j9NixHqtN2j8SKHcdJ0om').click()
         except NoSuchElementException:
-            time.sleep(10)
-            element = browser.find_element_by_id(id)
-        browser.execute_script("arguments[0].scrollIntoView(alignToTop=false);", element)
+            pass
 
+        if id:
+            try:
+                element = browser.find_element_by_id(id)
+            except NoSuchElementException:
+                time.sleep(10)
+                element = browser.find_element_by_id(id)
+            browser.execute_script("arguments[0].scrollIntoView(alignToTop=false);", element)
+        browser.save_screenshot("{}/pictures/{}.png".format(directory_name, file_name))
+        tts(comment_text, directory_name, file_name)
+        f.write("{}|||{}\n".format(comment_number, comment_link))
 
-    browser.save_screenshot("{}/pictures/{}.png".format(directoryname, filename))
+    f.close()
     browser.quit()
 
     
 if __name__ == '__main__':
     os.mkdir('tester_dir')
     os.mkdir('tester_dir/pictures')
-    for number in range(3):
-        screenshot_comment(
-            'https://www.reddit.com/r/AskReddit/comments/cy1rvg/every_sexual_fantasy_youve_ever_had_just_came/eyp9lbg/',
-            'tester_dir', 
-            'test_file{}'.format(str(number)),
-            "t1_eyp9lbg"
-        )
+    # for number in range(3):
+    #     screenshot_comment(
+    #         'https://www.reddit.com/r/AskReddit/comments/cy1rvg/every_sexual_fantasy_youve_ever_had_just_came/eyp9lbg/',
+    #         'tester_dir', 
+    #         'test_file{}'.format(str(number)),
+    #         "t1_eyp9lbg"
+    #     )
