@@ -24,11 +24,6 @@ from text_to_speech import tts
 from tqdm import tqdm
 
 
-def force_timeout():
-    os.system("taskkill /im firefox.exe /f /t")
-    os.system("taskkill /im geckodriver.exe /f /t")
-
-
 def headless() -> webdriver.Firefox:
     """Creates a headless firefox browser object to use
 
@@ -73,7 +68,6 @@ def screenshot_title(browser: webdriver.Firefox, link: str, directoryname: str, 
     Returns:
         None
     """
-    # browser = headless()
     browser.get(link)
     nsfw_check(browser)
 
@@ -82,10 +76,8 @@ def screenshot_title(browser: webdriver.Firefox, link: str, directoryname: str, 
         browser.execute_script("arguments[0].scrollIntoView(alignToTop=false);", element)
 
     browser.save_screenshot("{}/pictures/{}.png".format(directoryname, filename))
-    # browser.quit()
 
 
-# def screenshot_comment(link: str, directoryname: str, filename: str, id: str):
 def screenshot_comment(comments: list, directory_name: str):
     """The browser takes a screenshot of the comment
 
@@ -119,35 +111,9 @@ def screenshot_comment(comments: list, directory_name: str):
     
     for comment in tqdm(comments):
         comment_number, comment_text, comment_link, comment_id = comment.split("|||")
-        # number, link = comment.split("|||")
-        # id = link.split("/")[-2]
         id = "t1_{}".format(comment_id)
         file_name = "comment{}".format(comment_number)
-
-        # try:
-        #     t = Timer(60, force_timeout)
-        #     t.start()
-
-        #     browser.get(comment_link)
-        #     nsfw_check(browser)
-
-        #     try:
-        #         browser.find_element_by_css_selector('.PiO8QDmoJoOL2sDjJAk4C.j9NixHqtN2j8SKHcdJ0om').click()
-        #     except NoSuchElementException:
-        #         pass
-
-        #     if id:
-        #         try:
-        #             element = browser.find_element_by_id(id)
-        #         except NoSuchElementException:
-        #             time.sleep(10)
-        #             element = browser.find_element_by_id(id)
-        #         browser.execute_script("arguments[0].scrollIntoView(alignToTop=false);", element)
-        #     browser.save_screenshot("{}/pictures/{}.png".format(directory_name, file_name))
-        #     t.cancel()
-        # except socket.error:
-        #     browser = headless()
-
+        
         browser.get(comment_link)
         nsfw_check(browser)
 
