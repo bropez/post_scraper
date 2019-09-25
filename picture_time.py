@@ -17,10 +17,16 @@ This file can also be imported as a module and contains the following functions:
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
-import os
+import os, socket
 import time
+from threading import Timer
 from text_to_speech import tts
 from tqdm import tqdm
+
+
+def force_timeout():
+    os.system("taskkill /im firefox.exe /f /t")
+    os.system("taskkill /im geckodriver.exe /f /t")
 
 
 def headless() -> webdriver.Firefox:
@@ -34,10 +40,9 @@ def headless() -> webdriver.Firefox:
     """
     options = webdriver.FirefoxOptions()
     options.set_preference("dom.push.enabled", False)
-    # options.headless = True
+    options.headless = True
     b = webdriver.Firefox(options=options)
     b.set_window_size(1920, 1080)
-
     return b
 
 
@@ -109,6 +114,8 @@ def screenshot_comment(comments: list, directory_name: str):
     file = open("{}/.ytdescription.txt".format(directory_name), "w")
     file.write("{}\n\nPosted by u/{}".format(post_title, post_author))
     file.close()
+
+    f = open("{}/.comments.txt".format(directory_name), "a")
     
     for comment in tqdm(comments):
         comment_number, comment_text, comment_link, comment_id = comment.split("|||")
@@ -117,10 +124,32 @@ def screenshot_comment(comments: list, directory_name: str):
         id = "t1_{}".format(comment_id)
         file_name = "comment{}".format(comment_number)
 
+        # try:
+        #     t = Timer(60, force_timeout)
+        #     t.start()
+
+        #     browser.get(comment_link)
+        #     nsfw_check(browser)
+
+        #     try:
+        #         browser.find_element_by_css_selector('.PiO8QDmoJoOL2sDjJAk4C.j9NixHqtN2j8SKHcdJ0om').click()
+        #     except NoSuchElementException:
+        #         pass
+
+        #     if id:
+        #         try:
+        #             element = browser.find_element_by_id(id)
+        #         except NoSuchElementException:
+        #             time.sleep(10)
+        #             element = browser.find_element_by_id(id)
+        #         browser.execute_script("arguments[0].scrollIntoView(alignToTop=false);", element)
+        #     browser.save_screenshot("{}/pictures/{}.png".format(directory_name, file_name))
+        #     t.cancel()
+        # except socket.error:
+        #     browser = headless()
+
         browser.get(comment_link)
         nsfw_check(browser)
-
-        f = open("{}/.comments.txt".format(directory_name), "a")
 
         try:
             browser.find_element_by_css_selector('.PiO8QDmoJoOL2sDjJAk4C.j9NixHqtN2j8SKHcdJ0om').click()
@@ -135,6 +164,7 @@ def screenshot_comment(comments: list, directory_name: str):
                 element = browser.find_element_by_id(id)
             browser.execute_script("arguments[0].scrollIntoView(alignToTop=false);", element)
         browser.save_screenshot("{}/pictures/{}.png".format(directory_name, file_name))
+
         tts(comment_text, directory_name, file_name)
         f.write("{}|||{}\n".format(comment_number, comment_link))
 
