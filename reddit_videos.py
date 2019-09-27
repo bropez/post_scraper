@@ -147,35 +147,6 @@ def picture_and_tts(total_submissions: int, total_comments: int, hottest: list) 
         directory_name = make_directories(date_dir, str(hottest_iteration))
         all_comments = get_comments(directory_name,reddit_obj, submission_id, total_comments)
         screenshot_comment(all_comments, directory_name)
-        # for comment in all_comments:
-        #     if iteration == 0:
-        #         post_title, post_link = comment.split("|||")
-        #         title, author = post_title.split(" submitted by ")
-
-        #         tts(post_title, directory_name, ".title")
-        #         screenshot_title(post_link, directory_name, ".title", None)
-
-        #         file = open("{}/.description.txt".format(directory_name), "w")
-        #         file.write(post_title + "\n" + post_link)
-        #         file.close()
-
-        #         # youtube description
-        #         file = open("{}/.ytdescription.txt".format(directory_name), "w")
-        #         file.write("{}\n\nPosted by u/{}".format(title, author))
-        #         file.close()
-        #     else:
-        #         # comment_number, comment_text, comment_link, comment_id = comment.split("|||")
-        #         # comment_name = "comment{}".format(str(iteration))
-
-        #         # f = open("{}/.comments.txt".format(directory_name), "a")
-        #         # f.write("{}|||{}\n".format(comment_number, comment_link))
-        #         # f.close()
-
-        #         # tts(comment_text, directory_name, comment_name)
-        #         # screenshot_comment(comment_link, directory_name, comment_name, "t1_" + comment_id)
-
-        #     loading(iteration, total_comments)
-        #     iteration += 1
         
         print("Submission {} has been completed successfully".format(str(hottest_iteration)))
         print()

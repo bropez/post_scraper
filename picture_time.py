@@ -109,7 +109,11 @@ def screenshot_comment(comments: list, directory_name: str):
 
     f = open("{}/.comments.txt".format(directory_name), "a")
     
+    iteration = 0
     for comment in tqdm(comments):
+        if iteration == 20:
+            browser.close()
+            browser = headless()
         comment_number, comment_text, comment_link, comment_id = comment.split("|||")
         id = "t1_{}".format(comment_id)
         file_name = "comment{}".format(comment_number)
@@ -133,6 +137,7 @@ def screenshot_comment(comments: list, directory_name: str):
 
         tts(comment_text, directory_name, file_name)
         f.write("{}|||{}\n".format(comment_number, comment_link))
+        iteration = iteration + 1
 
     f.close()
     browser.quit()
